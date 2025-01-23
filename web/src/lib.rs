@@ -13,15 +13,19 @@ pub fn draw_mandelbrot(
     max_r: f32,
     min_i: f32,
     max_i: f32,
+    r: u32,
+    g: u32,
+    b: u32,
 ) -> JsValue {
     let window = web_sys::window().unwrap();
     let performance = window.performance().unwrap();
     performance.mark("start").unwrap();
     let span = Span::new(min_r, max_r, min_i, max_i);
+    let colors = [r, g, b];
     let mut buffer = if simd {
-        mandelbrot_simd((width, height), max_iteration, span)
+        mandelbrot_simd((width, height), max_iteration, span, colors)
     } else {
-        mandelbrot_sisd((width, height), max_iteration, span)
+        mandelbrot_sisd((width, height), max_iteration, span, colors)
     };
     performance.mark("end").unwrap();
     let _ = performance.measure_with_start_mark_and_end_mark("mandelbrot", "start", "end");

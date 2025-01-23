@@ -11,14 +11,14 @@ pub struct Rgb {
     pub data: [u8; 3],
 }
 
-fn iter_to_color(iteration: u32, max_iteration: u32) -> Rgb {
+fn iter_to_color(iteration: u32, max_iteration: u32, dr: u32, dg: u32, db: u32) -> Rgb {
     if iteration == max_iteration {
         return Rgb { data: [0, 0, 0] };
     }
-    let g = ((iteration * 16) % 16) as u8;
-    let b = ((iteration * 5) % 256) as u8;
-    let r = (iteration % 256) as u8;
-    Rgb { data: [r, g, b] }
+    let r = if dr == 0 { 0 } else { (iteration * 3) % dr };
+    let g = if dg == 0 { 0 } else { ((iteration + 1) * 3) % dg };
+    let b = if db == 0 { 0 } else { ((iteration + 2) * 3) % db }; 
+    Rgb { data: [r as u8, g as u8, b as u8] }
 }
 
 pub struct Span {
@@ -39,7 +39,7 @@ impl Span {
     }
 }
 
-pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u8> {
+pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32, span: Span, colors: [u32; 3]) -> Vec<u8> {
     let (width, height) = dim;
     let mut buffer = Vec::with_capacity((width * height) as usize * 4);
     let mut slice = vec![0.0; 4];
@@ -91,7 +91,7 @@ pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u
                     buffer.push(255);
                     continue;
                 }
-                let color = iter_to_color(*re, max_iteration);
+                let color = iter_to_color(*re, max_iteration, colors[0], colors[1], colors[2]);
                 buffer.push(color.data[0]);
                 buffer.push(color.data[1]);
                 buffer.push(color.data[2]);
@@ -102,7 +102,7 @@ pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u
     buffer
 }
 
-pub fn mandelbrot_sisd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u8> {
+pub fn mandelbrot_sisd(dim: (u32, u32), max_iteration: u32, span: Span, colors: [u32; 3]) -> Vec<u8> {
     let (width, height) = dim;
     let mut buffer = Vec::with_capacity((width * height) as usize * 4);
     for y in 0..height {
@@ -129,7 +129,7 @@ pub fn mandelbrot_sisd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u
                 buffer.push(255);
                 continue;
             }
-            let color = iter_to_color(iteration, max_iteration);
+                let color = iter_to_color(iteration, max_iteration, colors[0], colors[1], colors[2]);
             buffer.push(color.data[0]);
             buffer.push(color.data[1]);
             buffer.push(color.data[2]);
@@ -154,14 +154,14 @@ mod benchmarks {
     #[bench]
     fn bench_mandelbrot_simd(b: &mut Bencher) {
         b.iter(|| {
-            mandelbrot_simd((800, 600), 500, SPAN);
+            mandelbrot_simd((800, 600), 500, SPAN, [255, 255, 255]);
         });
     }
 
     #[bench]
     fn bench_mandelbrot_sisd(b: &mut Bencher) {
         b.iter(|| {
-            mandelbrot_sisd((800, 600), 500, SPAN);
+            mandelbrot_sisd((800, 600), 500, SPAN, [255, 255, 255]);
         });
     }
 }
