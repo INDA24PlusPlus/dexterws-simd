@@ -15,13 +15,31 @@ fn iter_to_color(iteration: u32, max_iteration: u32) -> Rgb {
     if iteration == max_iteration {
         return Rgb { data: [0, 0, 0] };
     }
-    let r = ((iteration * 16) % 16) as u8;
-    let g = ((iteration * 5) % 256) as u8;
-    let b = (iteration % 256) as u8;
+    let g = ((iteration * 16) % 16) as u8;
+    let b = ((iteration * 5) % 256) as u8;
+    let r = (iteration % 256) as u8;
     Rgb { data: [r, g, b] }
 }
 
-pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32) -> Vec<u8> {
+pub struct Span {
+    min_r: f32,
+    max_r: f32,
+    min_i: f32,
+    max_i: f32,
+}
+
+impl Span {
+    pub fn new(min_r: f32, max_r: f32, min_i: f32, max_i: f32) -> Self {
+        Self {
+            min_r,
+            max_r,
+            min_i,
+            max_i,
+        }
+    }
+}
+
+pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u8> {
     let (width, height) = dim;
     let mut buffer = Vec::with_capacity((width * height) as usize * 4);
     let mut slice = vec![0.0; 4];
@@ -34,10 +52,10 @@ pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32) -> Vec<u8> {
             let mut x0 = FloatSIMD::splat(x as f32);
             x0 = x0 + add;
             x0 = x0 / FloatSIMD::splat(width as f32);
-            x0 = x0 * FloatSIMD::splat(2.5) - FloatSIMD::splat(2.0);
+            x0 = x0 * FloatSIMD::splat(span.max_r - span.min_r) + FloatSIMD::splat(span.min_r);
             let y0 = FloatSIMD::splat(y as f32) / FloatSIMD::splat(height as f32)
-                * FloatSIMD::splat(2.0)
-                - FloatSIMD::splat(1.0);
+                * FloatSIMD::splat(span.max_i - span.min_i)
+                + FloatSIMD::splat(span.min_i);
             let mut x = FloatSIMD::splat(0.0);
             let mut y = FloatSIMD::splat(0.0);
 
@@ -84,13 +102,13 @@ pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32) -> Vec<u8> {
     buffer
 }
 
-pub fn mandelbrot_sisd(dim: (u32, u32), max_iteration: u32) -> Vec<u8> {
+pub fn mandelbrot_sisd(dim: (u32, u32), max_iteration: u32, span: Span) -> Vec<u8> {
     let (width, height) = dim;
     let mut buffer = Vec::with_capacity((width * height) as usize * 4);
     for y in 0..height {
         for x in 0..width {
-            let x0 = (x as f32 / width as f32) * 2.5 - 2.0;
-            let y0 = (y as f32 / height as f32) * 2.0 - 1.0;
+            let x0 = (x as f32 / width as f32) * (span.max_r - span.min_r) + span.min_r;
+            let y0 = (y as f32 / height as f32) * (span.max_i - span.min_i) + span.min_i;
             let mut x = 0.0;
             let mut y = 0.0;
             let mut iteration = 0;
@@ -126,17 +144,24 @@ mod benchmarks {
     use super::*;
     use test::Bencher;
 
+    const SPAN: Span = Span {
+        min_r: -2.0,
+        max_r: 1.0,
+        min_i: -1.0,
+        max_i: 1.0,
+    };
+
     #[bench]
     fn bench_mandelbrot_simd(b: &mut Bencher) {
         b.iter(|| {
-            mandelbrot_simd((800, 600), 500);
+            mandelbrot_simd((800, 600), 500, SPAN);
         });
     }
 
     #[bench]
     fn bench_mandelbrot_sisd(b: &mut Bencher) {
         b.iter(|| {
-            mandelbrot_sisd((800, 600), 500);
+            mandelbrot_sisd((800, 600), 500, SPAN);
         });
     }
 }

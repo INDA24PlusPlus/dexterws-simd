@@ -13,6 +13,11 @@ const runWasm = async () => {
   let renderButton = document.getElementById('render');
   let outputElem = document.getElementById('output');
 
+  let realMinElem = document.getElementById('min-r');
+  let realMaxElem = document.getElementById('max-r');
+  let imagMinElem = document.getElementById('min-i');
+  let imagMaxElem = document.getElementById('max-i');
+
   // Listener for button click
   renderButton.addEventListener('click', () => {
     let scale = parseFloat(scaleElem.value);
@@ -22,7 +27,11 @@ const runWasm = async () => {
     let height = 600 * scale;
     canvas.width = width;
     canvas.height = height;
-    let time = draw_mandelbrot(ctx, width, height, simd, max_iter);
+    let minR = parseFloat(realMinElem.value);
+    let maxR = parseFloat(realMaxElem.value);
+    let minI = parseFloat(imagMinElem.value);
+    let maxI = parseFloat(imagMaxElem.value);
+    let time = draw_mandelbrot(ctx, width, height, simd, max_iter, minR, maxR, minI, maxI);
     time = Math.ceil(time.duration);
     outputElem.textContent = `${time}ms`;
   });

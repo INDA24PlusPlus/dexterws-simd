@@ -1,4 +1,4 @@
-use mandelbrot::{mandelbrot_simd, mandelbrot_sisd};
+use mandelbrot::{mandelbrot_simd, mandelbrot_sisd, Span};
 use wasm_bindgen::{prelude::*, Clamped};
 use web_sys::{CanvasRenderingContext2d, ImageData, Performance};
 
@@ -9,14 +9,19 @@ pub fn draw_mandelbrot(
     height: u32,
     simd: bool,
     max_iteration: u32,
+    min_r: f32,
+    max_r: f32,
+    min_i: f32,
+    max_i: f32,
 ) -> JsValue {
     let window = web_sys::window().unwrap();
     let performance = window.performance().unwrap();
     performance.mark("start").unwrap();
+    let span = Span::new(min_r, max_r, min_i, max_i);
     let mut buffer = if simd {
-        mandelbrot_simd((width, height), max_iteration)
+        mandelbrot_simd((width, height), max_iteration, span)
     } else {
-        mandelbrot_sisd((width, height), max_iteration)
+        mandelbrot_sisd((width, height), max_iteration, span)
     };
     performance.mark("end").unwrap();
     let _ = performance.measure_with_start_mark_and_end_mark("mandelbrot", "start", "end");
