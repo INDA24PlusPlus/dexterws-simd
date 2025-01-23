@@ -1,12 +1,11 @@
 #![feature(portable_simd)]
 #![feature(test)]
+use std::io::Write;
 use std::simd::cmp::SimdPartialOrd;
-use std::{io::Write};
-use std::simd::{self, u32x4, f32x4};
+use std::simd::{self, f32x4, u32x4};
 
-type floatvec = f32x4;
-type uintvec = u32x4;
-
+type FloatSIMD = f32x4;
+type UIntSIMD = u32x4;
 
 pub struct Rgb {
     pub data: [u8; 3],
@@ -29,40 +28,41 @@ pub fn mandelbrot_simd(dim: (u32, u32), max_iteration: u32) -> Vec<u8> {
     for i in 0..4 {
         slice[i] = i as f32;
     }
-    let add = floatvec::from_slice(&slice);
+    let add = FloatSIMD::from_slice(&slice);
     for y in 0..height {
         for x in (0..width).step_by(4) {
-            let mut x0 = floatvec::splat(x as f32);
+            let mut x0 = FloatSIMD::splat(x as f32);
             x0 = x0 + add;
-            x0 = x0 / floatvec::splat(width as f32);
-            x0 = x0 * floatvec::splat(2.5) - floatvec::splat(2.0);
-            let y0 = floatvec::splat(y as f32) / floatvec::splat(height as f32) * floatvec::splat(2.0) - floatvec::splat(1.0);
-            let mut x = floatvec::splat(0.0);
-            let mut y = floatvec::splat(0.0);
+            x0 = x0 / FloatSIMD::splat(width as f32);
+            x0 = x0 * FloatSIMD::splat(2.5) - FloatSIMD::splat(2.0);
+            let y0 = FloatSIMD::splat(y as f32) / FloatSIMD::splat(height as f32)
+                * FloatSIMD::splat(2.0)
+                - FloatSIMD::splat(1.0);
+            let mut x = FloatSIMD::splat(0.0);
+            let mut y = FloatSIMD::splat(0.0);
 
-            let mut iteration = uintvec::splat(0);
+            let mut iteration = UIntSIMD::splat(0);
 
-            let threshhold = floatvec::splat(4.0);
+            let threshhold = FloatSIMD::splat(4.0);
 
             for _ in 0..max_iteration {
                 let xx = x * x;
                 let yy = y * y;
 
+                // Iteration logic from here: https://pythonspeed.com/articles/optimizing-with-simd/
                 let mask = (xx + yy).simd_lt(threshhold);
                 if !mask.any() {
                     break;
                 }
 
-                iteration += mask.select(
-                    uintvec::splat(1),
-                    uintvec::splat(0),
-                );
+                iteration += mask.select(UIntSIMD::splat(1), UIntSIMD::splat(0));
+
+                // Copy paste stop
 
                 let xy = x * y;
                 x = xx - yy + x0;
                 y = xy + xy + y0;
             }
-
 
             let res = iteration.as_array();
             for re in res {
