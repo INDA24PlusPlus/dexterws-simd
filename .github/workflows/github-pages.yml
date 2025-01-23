@@ -46,7 +46,7 @@ jobs:
       - name: Make site dir
         run: mkdir _site
       - name: Move files
-        run: mv index.html _site/index.html && mv pkg _site/pkg && mv script.js _site/script.js
+        run: mv www/* _site && mv pkg _site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
