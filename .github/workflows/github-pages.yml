@@ -41,6 +41,8 @@ jobs:
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
+      - name: Build
+        run: wasm-pack build web --target web --out-dir ../pkg
       - name: Make site dir
         run: mkdir _site
       - name: Move files
