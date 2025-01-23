@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World - Rust</title>
+    <script type="module" src="./script.js"></script>
+  </head>
+  <body>
+    <div class="container">
+    <div class="top">
+    <div class="inputs">
+      <div class="field">
+        <label for="scale">Scale:</label>
+        <input type="number" id="scale" value="1" max="8" min="0"/>
+      </div>
+      <div class="field">
+        <label for="simd">SIMD:</label>
+        <input type="checkbox" id="simd" />
+      </div>
+      <div class="max-iter">
+        <label for="max-iter">Max Iterations:</label>
+        <input type="number" id="max-iter" value="100" min="0" />
+      </div>
+      <button id="render">Render</button>
+    </div>
+    <div class="output">
+      <label for="output">Time to render:</label>
+      <span id="output">0ms</span>
+
+    </div>
+    </div>
+    <canvas id="display" width="800" height="600">
+        Your browser does not support the HTML5 canvas element.
+    </canvas>
+    </div>
+  </body>
+
+  <style>
+    body, html {
+      margin: 0;
+      display: flex;
+      /* direction column */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      width: 100%;
+      background-color: #1e1e1e;
+    }
+
+    canvas {
+      border: 1px solid darkred;
+      width: 100%;
+    }
+
+    label {
+      color: whitesmoke;
+    }
+
+    .inputs {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: start;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .field {
+      margin-right: 10px;
+      display: flex;
+      flex-direction: row;
+    }
+
+    .top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 50%;
+      min-width: 800px;
+    }
+
+    #output {
+      color: darkred;
+    }
+  </style>
+</html>
