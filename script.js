@@ -1,8 +1,8 @@
-import init from "./web/pkg/web.js";
+import init from "./pkg/web.js";
 
 const runWasm = async () => {
   // Instantiate our wasm module
-  const wasm = await init("./web/pkg/web_bg.wasm");
+  const wasm = await init("./pkg/web_bg.wasm");
   const { draw_mandelbrot } = wasm;
 
   let canvas = document.getElementById('display');
