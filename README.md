@@ -14,3 +14,6 @@ Jag använder mig endast av en f32x4 vektor, då WASM verkar endast stödja 128 
 
 ### Resurser
 [Mandelbrot generation](https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set)
+
+## Output
+![mandelbrot](https://github.com/user-attachments/assets/9d498cdb-1881-46d5-9ef1-d63e65096cd4)
