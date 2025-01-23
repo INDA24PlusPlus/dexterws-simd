@@ -16,7 +16,6 @@ const runWasm = async () => {
   // Listener for button click
   renderButton.addEventListener('click', () => {
     let scale = parseFloat(scaleElem.value);
-    console.log(simdElem.value);
     let simd = simdElem.checked;
     let max_iter = parseInt(iterElem.value);
     let width = 800 * scale;
