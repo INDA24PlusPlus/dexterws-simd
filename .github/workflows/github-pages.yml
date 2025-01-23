@@ -41,6 +41,10 @@ jobs:
         with:
           # Optional version of wasm-pack to install(eg. 'v0.9.1', 'latest')
           version: 'latest'
+      - name: Make site dir
+        run: mkdir _site
+      - name: Move files
+        run: mv index.html _site/index.html && mv pkg _site/pkg && mv script.js _site/script.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
